@@ -11,4 +11,14 @@ ERROR="${BRed}!{NC}"
 
 echo -e "[$OK] Listening on port 8888... "
 
-nc -l 8888 | grep tests | python3 build.py
+input=`nc -l 8888 | grep tests`
+
+if [[ `echo $input | wc -c` == 0 ]]; then
+    echo -e "[$ERROR] Got nothing 😐"
+    exit
+fi
+
+echo -e "[$OK] Got it!"
+echo -e "[$OK] Ready to roll 😎"
+
+echo $input | python3 build.py

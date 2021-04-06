@@ -8,17 +8,34 @@ BGreen='\033[1;32m'
 NC='\033[0m' # No Color
 
 OK="${BCyan}*${NC}"
-ERROR="${BRed}!{NC}"
+ERROR="${BRed}!${NC}"
 
-for x in `ls Testcase/$1*.in`; do
-    cat $x | python3 $1.py > Testcase/$1$tc.res
-    diff -y --suppress-common-lines Testcase/$1$tc.res Testcase/$1$tc.out > Testcase/diff.txt
+file_name=$1
+name=`echo $file_name | cut -d '.' -f 1`
+ext=`echo $file_name | cut -d '.' -f 2`
+
+for x in `ls Testcase/$name*.in`; do
+    if [[ $ext == py ]]; then
+        cat $x | python3 $name.py > Testcase/$name$tc.res
+    elif [[ $ext == cpp ]]; then
+        g++ -std=c++17 $file_name
+        cat $x | ./a.out > Testcase/$name$tc.res
+    elif [[ $ext == c ]]; then
+        gcc $file_name
+        cat $x | ./a.out > Testcase/$name$tc.res
+    elif [[ $ext == java ]]; then
+        javac $file_name
+        cat $x | $name.class > Testcase/$name$tc.res
+    fi
+
+    diff -y --suppress-common-lines Testcase/$name$tc.res Testcase/$name$tc.out > Testcase/diff.txt
 
     if [[ `echo $?` == 1 ]]; then
-        echo -e "${BRed} WA On Test $tc ${NC}"
+        echo -e "[$ERROR]${BRed} WA On Test $tc ${NC}"
         cat Testcase/diff.txt
     else
-        echo -e "${BGreen} PASSED ${NC}"
+        echo -e "[$OK]${BGreen} PASSED ${NC}"
     fi
+
     ((tc+=1))
 done
